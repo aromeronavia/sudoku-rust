@@ -1,10 +1,10 @@
 extern crate rand;
-use rand::Rng;
 use rand::thread_rng;
 use rand::seq::SliceRandom;
 
 static NUMBERS_RANGE: std::ops::Range<i32> = 1..10;
 static MATRIX_RANGE: std::ops::Range<usize> = 0..9;
+static QUADRANT_RANGES: [std::ops::Range<usize>;3]= [0..3, 3..6, 6..9];
 
 struct Sudoku {
     board: [[i32;9];9]
@@ -36,35 +36,15 @@ impl Sudoku {
                         self.board[row_index][column] = vector[column];
                     }
 
-                    let column_verified = Self::verify_columns(self.board);
+                    let columns_verified = Self::verify_columns(self.board);
                     let quadrants_verified = Self::verify_quadrants(self.board);
 
-                    // println!("row verified: {}, column_verified: {}", row_verified, column_verified);
-                    if column_verified && quadrants_verified {
+                    if columns_verified && quadrants_verified {
                         break;
                     }
                 }
             }
-
-            println!("ROW {}", row_index);
-            for row_index in MATRIX_RANGE.clone() {
-                println!("{:?}", self.board[row_index]);
-            }
         }
-
-        for row_index in MATRIX_RANGE.clone() {
-            println!("{:?}", self.board[row_index]);
-        }
-    }
-
-    fn verify_row(board: [[i32;9];9], row_index: usize) -> bool {
-        let mut row_elements: Vec<i32> = Vec::new();
-
-        for column_index in MATRIX_RANGE.clone() {
-            row_elements.push(board[row_index][column_index]);
-        }
-
-        !Self::has_duplicates(row_elements)
     }
 
     fn verify_columns(board: [[i32;9];9]) -> bool {
@@ -81,6 +61,25 @@ impl Sudoku {
         }
 
         result
+    }
+
+    fn verify_quadrants(board: [[i32;9];9]) -> bool {
+        let mut valid = true;
+
+        for row_iter in QUADRANT_RANGES.clone() {
+            for column_iter in QUADRANT_RANGES.clone() {
+                let mut elements: Vec<i32> = Vec::new();
+                for row_index in row_iter.clone() {
+                    for column_index in column_iter.clone() {
+                        elements.push(board[row_index][column_index]);
+                    }
+                }
+
+                valid = valid && !Self::has_duplicates(elements.clone());
+            }
+        }
+
+        valid
     }
 
     fn has_duplicates(mut elements: Vec<i32>) -> bool {
@@ -103,96 +102,23 @@ impl Sudoku {
 
         false
     }
-
-    fn verify_quadrants(board: [[i32;9];9]) -> bool {
-        let mut valid = true;
-        let elements: &mut Vec<i32> = &mut Vec::new();
-
-        for row_index in 0..3 {
-            for column_index in 0..3 {
-                elements.push(board[row_index][column_index]);
-            }
-        }
-        valid = valid && !Self::has_duplicates(elements.clone());
-
-        let elements: &mut Vec<i32> = &mut Vec::new();
-        for row_index in 0..3 {
-            for column_index in 3..6 {
-                elements.push(board[row_index][column_index]);
-            }
-        }
-        valid = valid && !Self::has_duplicates(elements.clone());
-
-        let elements: &mut Vec<i32> = &mut Vec::new();
-        for row_index in 0..3 {
-            for column_index in 6..9 {
-                elements.push(board[row_index][column_index]);
-            }
-        }
-        valid = valid && !Self::has_duplicates(elements.clone());
-
-        let elements: &mut Vec<i32> = &mut Vec::new();
-        for row_index in 3..6 {
-            for column_index in 0..3 {
-                elements.push(board[row_index][column_index]);
-            }
-        }
-        valid = valid && !Self::has_duplicates(elements.clone());
-
-        let elements: &mut Vec<i32> = &mut Vec::new();
-        for row_index in 3..6 {
-            for column_index in 3..6 {
-                elements.push(board[row_index][column_index]);
-            }
-
-        }
-        valid = valid && !Self::has_duplicates(elements.clone());
-
-        let elements: &mut Vec<i32> = &mut Vec::new();
-        for row_index in 3..6 {
-            for column_index in 6..9 {
-                elements.push(board[row_index][column_index]);
-            }
-        }
-        valid = valid && !Self::has_duplicates(elements.clone());
-
-        let elements: &mut Vec<i32> = &mut Vec::new();
-        for row_index in 6..9 {
-            for column_index in 0..3 {
-                elements.push(board[row_index][column_index]);
-            }
-
-        }
-        valid = valid && !Self::has_duplicates(elements.clone());
-
-        let elements: &mut Vec<i32> = &mut Vec::new();
-        for row_index in 6..9 {
-            for column_index in 3..6 {
-                elements.push(board[row_index][column_index]);
-            }
-        }
-        valid = valid && !Self::has_duplicates(elements.clone());
-
-        let elements: &mut Vec<i32> = &mut Vec::new();
-        for row_index in 6..9 {
-            for column_index in 6..9 {
-                elements.push(board[row_index][column_index]);
-            }
-
-        }
-        valid = valid && !Self::has_duplicates(elements.clone());
-
-        valid
-    }
 }
 
 fn main() {
     let sudoku = Sudoku::new();
+    println!("Creating sudoku");
+    for row in sudoku.board {
+        println!("{:?}", row);
+    }
 }
 
 #[test]
 fn sudoku_board_is_correct() {
     let sudoku = Sudoku::new();
+    for index in 0..9 {
+        println!("{:?}", sudoku.board[index]);
+    }
+
     for index in 0..9 {
         let mut row = sudoku.board[index].clone();
         row.sort();
