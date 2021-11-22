@@ -10,7 +10,7 @@ $ cargo run
 
 # Running tests
 ```sh
-➜  sudoku git:(main) ✗ cargo test -- --nocapture
+➜ cargo test -- --nocapture
     Finished test [unoptimized + debuginfo] target(s) in 0.00s
      Running unittests (target/debug/deps/sudoku-df1eaeab5155eb19)
 
